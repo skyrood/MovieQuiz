@@ -2,15 +2,20 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController {
     
+    // меняем цвет текста в статус баре, т.к. фон приложения темный
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+    
     // модель даты для вопросов
-    struct QuizQuestion {
+    private struct QuizQuestion {
         let image: String
         let text: String
         let correctAnswer: Bool
     }
     
     // модель вопроса
-    struct QuizStepViewModel {
+    private struct QuizStepViewModel {
         let image: UIImage?
         let question: String
         let questionNumber: String
@@ -23,14 +28,14 @@ final class MovieQuizViewController: UIViewController {
     }
     
     // модель результата квиза
-    struct QuizResultViewModel {
+    private struct QuizResultViewModel {
         let title: String
         let text: String
         let buttonText: String
     }
 
     // мок дата для квиза
-    var QuizQuestions: [QuizQuestion] = [
+    private var QuizQuestions: [QuizQuestion] = [
         QuizQuestion(
             image: "The Godfather",
             text: "Рейтинг этого фильма больше чем 6?",
@@ -101,11 +106,6 @@ final class MovieQuizViewController: UIViewController {
         // показываем первый вопрос при запуске приложения
         let currentQuestion = convert(model: QuizQuestions[currentQuestionIndex])
         show(quiz: currentQuestion)
-    }
-    
-    // меняем цвет текста в статус баре, т.к. фон приложения темный
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
     }
     
     // функция преобразования данных вопросов в вопрос
