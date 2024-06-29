@@ -15,6 +15,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
+    // инициализация сервиса статистики
+    private var statisticsService: StatisticsServiceProtocol?
+    
     // инициализация аутлетов элементов интерфейса
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var questionTitleLabel: UILabel!
@@ -35,6 +38,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         // задаем закругление границ картинки
         imageView.layer.cornerRadius = 20
+        
+        // создаем экземпляр сервиса статистики
+        statisticsService = StatisticsService()
         
         // инициализация фабирки вопросов
         let questionFactory = QuestionFactory()
@@ -71,7 +77,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         imageView.layer.borderWidth = 0
     }
     
-    // функция сброса квиза
+    // функция сброса данных квиза
     func resetQuiz() {
         if let questionFactory = questionFactory {
             questionFactory.resetIndices()
@@ -82,7 +88,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         resetBorders()
     }
 
-    
     // метод отображения вопроса
     private func show(quiz step: QuizStepViewModel) {
         counterLabel.text = step.questionNumber
@@ -117,9 +122,26 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     // функция отображения результатов квиза либо следующего вопроса
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
+            
+            // формирование и сохранение данных для результата
+            let currentGameResult = GameResult(correct: correctAnswers, total: questionsAmount, date: Date().dateTimeString)
+            
+            self.statisticsService?.store(correct: currentGameResult.correct, total: currentGameResult.total)
+        
+            let result = String(currentGameResult.correct) + "/" + String(currentGameResult.total)
+            
+            let totalGamesCount = String((self.statisticsService?.gamesCount ?? 0))
+
+            let record = "\(self.statisticsService?.bestGame.correct ?? currentGameResult.correct)/\(self.statisticsService?.bestGame.total ?? currentGameResult.total) (\(self.statisticsService?.bestGame.date ?? "date not found"))"
+            
+            var currentAccuracy: String = "146" // просто не придумал, что возвращать в случае ошибки
+            if let accuracy = self.statisticsService?.totalAccuracy {
+                currentAccuracy = String(format: "%.2f", accuracy) + " %"
+            }
+
             let quizResult = AlertModel(
                 title: "Раунд окончен",
-                message: "Ваш результат: \(correctAnswers)/\(questionsAmount)",
+                message: "Ваш результат: \(result),\nКоличество сыгранных квизов: \(totalGamesCount)\nРекорд: \(record)\nСредняя точность: \(currentAccuracy)",
                 buttonText: "Сыграть еще раз") {
                     self.resetQuiz()
                     self.questionFactory?.requestNextQuestion()
@@ -144,7 +166,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         noButton.isEnabled = false
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            // Check if self still exists
             guard let self = self else { return }
                 
             self.yesButton.isEnabled = true
