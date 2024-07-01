@@ -148,7 +148,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
                 }
                 
             // Создаем и выводим алерт
-            let alertPresenter = AlertPresenter()
+            let alertPresenter: AlertPresenterProtocol = AlertPresenter()
             alertPresenter.setDelegate(self)
             alertPresenter.show(quiz: quizResult)
             
