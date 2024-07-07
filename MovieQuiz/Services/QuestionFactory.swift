@@ -24,10 +24,12 @@ class QuestionFactory: QuestionFactoryProtocol {
         self.moviesLoader = moviesLoader
     }
     
+    // сброс массива индексов к дефолтному состоянию
     func resetIndices() {
         self.questionIndices = Array(0..<self.movies.count)
     }
     
+    // загрузка данных
     func loadData() {
         moviesLoader.loadMovies { [weak self] result in
             DispatchQueue.main.async {
@@ -44,6 +46,7 @@ class QuestionFactory: QuestionFactoryProtocol {
         }
     }
     
+    // формирование данных для вопроса
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }

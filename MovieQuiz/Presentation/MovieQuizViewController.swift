@@ -73,6 +73,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         }
     }
     
+    // показ и скрытие индикатора загрузки
     private func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
@@ -83,11 +84,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         activityIndicator.isHidden = true
     }
     
+    // метод делегата, сообщающий об успешной загрузке и показывающий первый вопрос
     func didLoadDataFromServer() {
         hideLoadingIndicator()
         questionFactory?.requestNextQuestion()
     }
     
+    // метода делегата, сообщающий об ошибке загрузки данных
     func didFailToLoadData(with error: Error) {
         showNetworkError(message: error.localizedDescription)
     }
@@ -208,15 +211,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     private func blockButtons() {
         yesButton.isEnabled = false
         noButton.isEnabled = false
-        
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-//            guard let self = self else { return }
-//                
-//            self.yesButton.isEnabled = true
-//            self.noButton.isEnabled = true
-//        }
     }
     
+    // разблокировка кнопок с ответами
     func unblockButtons() {
         DispatchQueue.main.async {
             self.yesButton.isEnabled = true
