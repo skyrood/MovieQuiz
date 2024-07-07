@@ -18,7 +18,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     // инициализация сервиса статистики
     private var statisticsService: StatisticsServiceProtocol?
     
+    // инициализация алерт презентера
+    private var alertPresenter: AlertPresenterProtocol?
+    
     // инициализация аутлетов элементов интерфейса
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak private var counterLabel: UILabel!
     @IBOutlet weak private var questionTitleLabel: UILabel!
     @IBOutlet weak private var imageView: UIImageView!
@@ -42,13 +46,19 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         // создаем экземпляр сервиса статистики
         statisticsService = StatisticsService()
         
+        // создаем объект алерт презентера
+        alertPresenter = AlertPresenter()
+        alertPresenter?.setDelegate(self)
+        
         // инициализация фабирки вопросов
-        let questionFactory = QuestionFactory()
+        let moviesLoader = MoviesLoader()
+        let questionFactory = QuestionFactory(moviesLoader)
         questionFactory.setDelegate(self)
         self.questionFactory = questionFactory
         
-        // показываем первый вопрос при запуске приложения
-        questionFactory.requestNextQuestion()
+        // загружаем данные при запуске приложения
+        showLoadingIndicator()
+        questionFactory.loadData()
     }
     
     // MARK: - QuestionFactoryDelegate
@@ -63,12 +73,33 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         }
     }
     
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
+    }
+    
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
     // функция преобразования данных вопросов в вопрос
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
-            imageName: model.image,
+            image: model.image,
             question: model.text,
-            questionNumber: currentQuestionIndex)
+            questionNumber: currentQuestionIndex,
+            questionsAmount: questionsAmount
+        )
     }
     
     // функция сброса рамки картинки
@@ -79,10 +110,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // функция сброса данных квиза
     func resetQuiz() {
-        if let questionFactory = questionFactory {
-            questionFactory.resetIndices()
-        }
-        
         currentQuestionIndex = 0
         correctAnswers = 0
         resetBorders()
@@ -142,15 +169,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             let quizResult = AlertModel(
                 title: "Раунд окончен",
                 message: "Ваш результат: \(result),\nКоличество сыгранных квизов: \(totalGamesCount)\nРекорд: \(record)\nСредняя точность: \(currentAccuracy)",
-                buttonText: "Сыграть еще раз") {
+                buttonText: "Сыграть еще раз") { [weak self] in
+                    guard let self = self else { return }
+                    
                     self.resetQuiz()
                     self.questionFactory?.requestNextQuestion()
                 }
                 
-            // Создаем и выводим алерт
-            let alertPresenter: AlertPresenterProtocol = AlertPresenter()
-            alertPresenter.setDelegate(self)
-            alertPresenter.show(quiz: quizResult)
+            // Выводим алерт
+            self.alertPresenter?.show(quiz: quizResult)
             
         } else {
             resetBorders()
@@ -160,14 +187,38 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         }
     }
     
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let errorInfo = AlertModel(
+            title: "Ошибка",
+            message: message,
+            buttonText: "Попробовать еще раз") { [weak self] in
+                guard let self = self else { return }
+                
+                self.resetQuiz()
+                self.questionFactory?.requestNextQuestion()
+            }
+        
+        // Создаем и выводим алерт
+        self.alertPresenter?.show(quiz: errorInfo)
+    }
+    
     // блок кнопок с ответами на 1 с
     private func blockButtons() {
         yesButton.isEnabled = false
         noButton.isEnabled = false
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
-                
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+//            guard let self = self else { return }
+//                
+//            self.yesButton.isEnabled = true
+//            self.noButton.isEnabled = true
+//        }
+    }
+    
+    func unblockButtons() {
+        DispatchQueue.main.async {
             self.yesButton.isEnabled = true
             self.noButton.isEnabled = true
         }

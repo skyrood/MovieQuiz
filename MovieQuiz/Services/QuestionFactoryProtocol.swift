@@ -9,6 +9,6 @@ import Foundation
 
 protocol QuestionFactoryProtocol {
     func requestNextQuestion()
-    
-    func resetIndices()
+//    func resetIndices()
+    func loadData()
 }
