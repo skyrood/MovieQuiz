@@ -57,7 +57,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         self.questionFactory = questionFactory
         
         // загружаем данные при запуске приложения
-//        showLoadingIndicator()
         activityIndicator.hidesWhenStopped = true
         activityIndicator.startAnimating()
         
@@ -80,13 +79,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // показ и скрытие индикатора загрузки
     private func showLoadingIndicator() {
-//        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     private func hideLoadingIndicator() {
         activityIndicator.stopAnimating()
-//        activityIndicator.isHidden = true
     }
     
     // метод делегата, сообщающий об успешной загрузке и показывающий первый вопрос
