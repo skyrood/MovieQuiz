@@ -7,7 +7,7 @@
 
 import Foundation
 
-class QuestionFactory: QuestionFactoryProtocol {
+final class QuestionFactory: QuestionFactoryProtocol {
     
     private weak var delegate: QuestionFactoryDelegate?
     private let moviesLoader: MoviesLoading
@@ -69,8 +69,6 @@ class QuestionFactory: QuestionFactoryProtocol {
             let correctAnswer = rating > 7
             
             let question = QuizQuestion(image: imageData, text: text, correctAnswer: correctAnswer)
-            
-            self.delegate?.unblockButtons()
             
             self.questionIndices.removeAll { $0 == index }
             

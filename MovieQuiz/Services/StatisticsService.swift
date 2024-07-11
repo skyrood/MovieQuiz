@@ -7,7 +7,7 @@
 
 import Foundation
 
-class StatisticsService {
+final class StatisticsService {
     private let storage: UserDefaults = .standard
     
     private enum Keys: String {

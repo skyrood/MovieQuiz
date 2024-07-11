@@ -57,7 +57,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         self.questionFactory = questionFactory
         
         // загружаем данные при запуске приложения
-        showLoadingIndicator()
+//        showLoadingIndicator()
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.startAnimating()
+        
         questionFactory.loadData()
     }
     
@@ -70,24 +73,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
+            self?.changeButtonsState(isEnabled: true)
+            self?.hideLoadingIndicator()
         }
     }
     
     // показ и скрытие индикатора загрузки
     private func showLoadingIndicator() {
-        activityIndicator.isHidden = false
+//        activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     private func hideLoadingIndicator() {
         activityIndicator.stopAnimating()
-        activityIndicator.isHidden = true
+//        activityIndicator.isHidden = true
     }
     
     // метод делегата, сообщающий об успешной загрузке и показывающий первый вопрос
     func didLoadDataFromServer() {
         hideLoadingIndicator()
         questionFactory?.requestNextQuestion()
+        changeButtonsState(isEnabled: true)
     }
     
     // метода делегата, сообщающий об ошибке загрузки данных
@@ -140,6 +146,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
+            self.showLoadingIndicator()
             self.showNextQuestionOrResults()
         }
     }
@@ -207,23 +214,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         self.alertPresenter?.show(quiz: errorInfo)
     }
     
-    // блок кнопок с ответами на 1 с
-    private func blockButtons() {
-        yesButton.isEnabled = false
-        noButton.isEnabled = false
-    }
-    
-    // разблокировка кнопок с ответами
-    func unblockButtons() {
-        DispatchQueue.main.async {
-            self.yesButton.isEnabled = true
-            self.noButton.isEnabled = true
-        }
+    private func changeButtonsState(isEnabled: Bool) {
+        noButton.isEnabled = isEnabled
+        yesButton.isEnabled = isEnabled
     }
     
     // обработчик нажатия на кнопку НЕТ
     @IBAction private func noButtonClicked(_ sender: Any) {
-        blockButtons()
+        changeButtonsState(isEnabled: false)
         guard let currentQuestion = currentQuestion else { return }
         let answer = false
         let result = (answer == currentQuestion.correctAnswer)
@@ -233,7 +231,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // обработчик нажания на кнопку ДА
     @IBAction private func yesButtonClocked(_ sender: Any) {
-        blockButtons()
+        changeButtonsState(isEnabled: false)
         guard let currentQuestion = currentQuestion else { return }
         let answer = true
         let result = (answer == currentQuestion.correctAnswer)
