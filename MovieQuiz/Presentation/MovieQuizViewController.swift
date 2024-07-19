@@ -16,7 +16,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     private var questionFactory: QuestionFactoryProtocol?
     
     // инициализация сервиса статистики
-    private var statisticsService: StatisticsServiceProtocol?
+    var statisticsService: StatisticsServiceProtocol?
     
     // инициализация алерт презентера
     private var alertPresenter: AlertPresenterProtocol?
@@ -102,7 +102,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
 //    }
     
     // функция сброса рамки картинки
-    private func resetBorders() {
+    func resetBorders() {
         imageView.layer.borderColor = nil
         imageView.layer.borderWidth = 0
     }
@@ -136,6 +136,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
+            self.presenter.correctAnswers = self.correctAnswers
+            self.presenter.questionFactory = self.questionFactory
+            self.presenter.alertPresenter = self.alertPresenter
             self.showLoadingIndicator()
             self.showNextQuestionOrResults()
         }
