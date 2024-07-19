@@ -14,7 +14,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // инициализация количества вопросов для раунда, переменных фабрики вопросов, текущего вопроса, алерт презентера
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
     
     // инициализация сервиса статистики
     private var statisticsService: StatisticsServiceProtocol?
@@ -68,16 +67,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
-        guard let question = question else { return }
-        
-        currentQuestion = question
-        let viewModel = presenter.convert(model: question)
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.show(quiz: viewModel)
-            self?.changeButtonsEnabledState(to: true)
-            self?.hideLoadingIndicator()
-        }
+        presenter.didReceiveNextQuestion(question: question)
     }
     
     // показ и скрытие индикатора загрузки
@@ -85,7 +75,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         activityIndicator.startAnimating()
     }
     
-    private func hideLoadingIndicator() {
+    func hideLoadingIndicator() {
         activityIndicator.stopAnimating()
     }
     
@@ -125,7 +115,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     }
 
     // метод отображения вопроса
-    private func show(quiz step: QuizStepViewModel) {
+    func show(quiz step: QuizStepViewModel) {
         counterLabel.text = step.questionNumber
         imageView.image = step.image
         questionLabel.text = step.question
@@ -221,13 +211,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // обработчик нажатия на кнопку НЕТ
     @IBAction private func noButtonClicked(_ sender: Any) {
-        presenter.currentQuestion = currentQuestion
         presenter.noButtonClicked()
     }
     
     // обработчик нажания на кнопку ДА
     @IBAction private func yesButtonClocked(_ sender: Any) {
-        presenter.currentQuestion = currentQuestion
         presenter.yesButtonClicked()
     }
 }

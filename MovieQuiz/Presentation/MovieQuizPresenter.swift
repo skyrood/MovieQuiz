@@ -48,10 +48,23 @@ final class MovieQuizPresenter {
     
     private func didAnswer(_ answer: Bool) {
         viewController?.changeButtonsEnabledState(to: false)
-            guard let currentQuestion = currentQuestion else { return }
+        guard let currentQuestion = currentQuestion else { return }
         
-            let givenAnswer = answer
-            let result = (answer == currentQuestion.correctAnswer)
-            viewController?.showAnswerResult(isCorrect: result)
+        let givenAnswer = answer
+        let result = (answer == currentQuestion.correctAnswer)
+        viewController?.showAnswerResult(isCorrect: result)
+    }
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else { return }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+            self?.viewController?.changeButtonsEnabledState(to: true)
+            self?.viewController?.hideLoadingIndicator()
         }
+    }
 }
