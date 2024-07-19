@@ -44,6 +44,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         // задаем закругление границ картинки
         imageView.layer.cornerRadius = 20
         
+        presenter.viewController = self
+        
         // создаем экземпляр сервиса статистики
         statisticsService = StatisticsService()
         
@@ -73,7 +75,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
-            self?.changeButtonsState(isEnabled: true)
+            self?.changeButtonsEnabledState(to: true)
             self?.hideLoadingIndicator()
         }
     }
@@ -91,7 +93,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     func didLoadDataFromServer() {
         hideLoadingIndicator()
         questionFactory?.requestNextQuestion()
-        changeButtonsState(isEnabled: true)
+        changeButtonsEnabledState(to: true)
     }
     
     // метода делегата, сообщающий об ошибке загрузки данных
@@ -131,7 +133,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // метод подсвечивания рамки изображения в зависимости от правильности ответа
     // и перехода к следующему вопросу/показу результатов
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         
@@ -212,28 +214,20 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         self.alertPresenter?.show(quiz: errorInfo)
     }
     
-    private func changeButtonsState(isEnabled: Bool) {
-        noButton.isEnabled = isEnabled
-        yesButton.isEnabled = isEnabled
+    func changeButtonsEnabledState(to status: Bool) {
+        noButton.isEnabled = status
+        yesButton.isEnabled = status
     }
     
     // обработчик нажатия на кнопку НЕТ
     @IBAction private func noButtonClicked(_ sender: Any) {
-        changeButtonsState(isEnabled: false)
-        guard let currentQuestion = currentQuestion else { return }
-        let answer = false
-        let result = (answer == currentQuestion.correctAnswer)
-        
-        showAnswerResult(isCorrect: result)
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
     // обработчик нажания на кнопку ДА
     @IBAction private func yesButtonClocked(_ sender: Any) {
-        changeButtonsState(isEnabled: false)
-        guard let currentQuestion = currentQuestion else { return }
-        let answer = true
-        let result = (answer == currentQuestion.correctAnswer)
-                
-        showAnswerResult(isCorrect: result)
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
     }
 }

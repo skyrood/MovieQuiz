@@ -12,6 +12,9 @@ final class MovieQuizPresenter {
     let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
     
+    var currentQuestion: QuizQuestion?
+    weak var viewController: MovieQuizViewController?
+    
     func isLastQuestion() -> Bool {
             currentQuestionIndex == questionsAmount - 1
         }
@@ -32,4 +35,23 @@ final class MovieQuizPresenter {
             questionsAmount: questionsAmount
         )
     }
+    
+    // обработчик нажатия на кнопку НЕТ
+    func noButtonClicked() {
+        didAnswer(false)
+    }
+    
+    // обработчик нажания на кнопку ДА
+    func yesButtonClicked() {
+        didAnswer(true)
+    }
+    
+    private func didAnswer(_ answer: Bool) {
+        viewController?.changeButtonsEnabledState(to: false)
+            guard let currentQuestion = currentQuestion else { return }
+        
+            let givenAnswer = answer
+            let result = (answer == currentQuestion.correctAnswer)
+            viewController?.showAnswerResult(isCorrect: result)
+        }
 }
