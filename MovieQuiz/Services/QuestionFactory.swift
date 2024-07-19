@@ -12,16 +12,13 @@ final class QuestionFactory: QuestionFactoryProtocol {
     private weak var delegate: QuestionFactoryDelegate?
     private let moviesLoader: MoviesLoading
     
-    func setDelegate(_ delegate: QuestionFactoryDelegate) {
-        self.delegate = delegate
-    }
-    
     private var movies: [MostPopularMovie] = []
     
     private var questionIndices: [Int] = []
     
-    init(_ moviesLoader: MoviesLoading) {
+    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate) {
         self.moviesLoader = moviesLoader
+        self.delegate = delegate
     }
     
     // сброс массива индексов к дефолтному состоянию

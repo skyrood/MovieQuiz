@@ -7,7 +7,19 @@
 
 import UIKit
 
-final class MovieQuizPresenter {
+final class MovieQuizPresenter: QuestionFactoryDelegate {
+    var questionFactory: QuestionFactoryProtocol?
+    weak var viewController: MovieQuizViewController?
+    
+    init(viewController: MovieQuizViewController) {
+        self.viewController = viewController
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        
+        questionFactory?.loadData()
+        viewController.showLoadingIndicator()
+    }
+
     // инициализация номера вопроса и количества правильных ответов
     let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
@@ -15,9 +27,6 @@ final class MovieQuizPresenter {
     var correctAnswers: Int = 0 //new
     
     var currentQuestion: QuizQuestion?
-    weak var viewController: MovieQuizViewController?
-    
-    var questionFactory: QuestionFactoryProtocol?
     
     var alertPresenter: AlertPresenterProtocol?
     
@@ -124,4 +133,15 @@ final class MovieQuizPresenter {
             questionFactory?.requestNextQuestion()
         }
     }
+    
+    // метод делегата, сообщающий об успешной загрузке и показывающий первый вопрос
+    func didLoadDataFromServer() {
+        viewController?.hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+        viewController?.changeButtonsEnabledState(to: true)
+    }
+    
+        func didFailToLoadData(with error: Error) {
+            viewController?.showNetworkError(message: error.localizedDescription)
+        }
 }

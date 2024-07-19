@@ -1,16 +1,12 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, AlertPresenterDelegate {
+final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
     // меняем цвет текста в статус баре, т.к. фон приложения темный
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
-    // инициализация презентера
-    private let presenter = MovieQuizPresenter()
-    
-    // инициализация количества вопросов для раунда, переменных фабрики вопросов, текущего вопроса, алерт презентера
-    private var questionFactory: QuestionFactoryProtocol?
+    private var presenter: MovieQuizPresenter!
     
     // инициализация сервиса статистики
     var statisticsService: StatisticsServiceProtocol?
@@ -40,7 +36,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         // задаем закругление границ картинки
         imageView.layer.cornerRadius = 20
         
-        presenter.viewController = self
+        // инициализация презентера
+        presenter = MovieQuizPresenter(viewController: self)
         
         // создаем экземпляр сервиса статистики
         statisticsService = StatisticsService()
@@ -49,43 +46,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         alertPresenter = AlertPresenter()
         alertPresenter?.setDelegate(self)
         
-        // инициализация фабирки вопросов
-        let moviesLoader = MoviesLoader()
-        let questionFactory = QuestionFactory(moviesLoader)
-        questionFactory.setDelegate(self)
-        self.questionFactory = questionFactory
-        
         // загружаем данные при запуске приложения
         activityIndicator.hidesWhenStopped = true
-        activityIndicator.startAnimating()
-        
-        questionFactory.loadData()
-    }
-    
-    // MARK: - QuestionFactoryDelegate
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        presenter.didReceiveNextQuestion(question: question)
+        showLoadingIndicator()
     }
     
     // показ и скрытие индикатора загрузки
-    private func showLoadingIndicator() {
+    func showLoadingIndicator() {
         activityIndicator.startAnimating()
     }
     
     func hideLoadingIndicator() {
         activityIndicator.stopAnimating()
-    }
-    
-    // метод делегата, сообщающий об успешной загрузке и показывающий первый вопрос
-    func didLoadDataFromServer() {
-        hideLoadingIndicator()
-        questionFactory?.requestNextQuestion()
-        changeButtonsEnabledState(to: true)
-    }
-    
-    // метода делегата, сообщающий об ошибке загрузки данных
-    func didFailToLoadData(with error: Error) {
-        showNetworkError(message: error.localizedDescription)
     }
     
     // функция сброса рамки картинки
@@ -115,7 +87,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
-            self.presenter.questionFactory = self.questionFactory
+//            self.presenter.questionFactory = self.questionFactory
             self.presenter.alertPresenter = self.alertPresenter
             self.showLoadingIndicator()
             self.presenter.showNextQuestionOrResults()
@@ -127,7 +99,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         self.present(alert, animated: true, completion: nil)
     }
     
-    private func showNetworkError(message: String) {
+    func showNetworkError(message: String) {
         hideLoadingIndicator()
         
         let errorInfo = AlertModel(
@@ -137,7 +109,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
                 guard let self = self else { return }
                 
                 self.presenter.resetQuiz()
-                self.questionFactory?.requestNextQuestion()
+//                self.questionFactory?.requestNextQuestion()
             }
         
         // Создаем и выводим алерт
