@@ -20,6 +20,8 @@ class AlertPresenter: AlertPresenterProtocol {
             message: result.message,
             preferredStyle: .alert)
         
+        alert.view.accessibilityIdentifier = "completionAlert"
+        
         let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
             result.completion()
         }

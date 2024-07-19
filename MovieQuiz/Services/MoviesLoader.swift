@@ -17,7 +17,11 @@ private enum ApiUrlConstants {
 }
 
 struct MoviesLoader: MoviesLoading {
-    private let networkClient = NetworkClient()
+    private let networkClient: NetworkRouting
+    
+    init(networkClient: NetworkRouting = NetworkClient()) {
+        self.networkClient = networkClient
+    }
     
     private var mostPopularMoviesUrl: URL {
         guard let url = URL(string: (ApiUrlConstants.baseUrl + ApiUrlConstants.privateKey)) else {
