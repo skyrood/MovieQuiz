@@ -6,9 +6,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         return .lightContent
     }
     
-    // инициализация количества правильных ответов
-    private var correctAnswers: Int = 0
-    
     // инициализация презентера
     private let presenter = MovieQuizPresenter()
     
@@ -91,27 +88,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         showNetworkError(message: error.localizedDescription)
     }
     
-    // функция преобразования данных вопросов в вопрос
-//    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-//        return QuizStepViewModel(
-//            image: model.image,
-//            question: model.text,
-//            questionNumber: currentQuestionIndex,
-//            questionsAmount: questionsAmount
-//        )
-//    }
-    
     // функция сброса рамки картинки
     func resetBorders() {
         imageView.layer.borderColor = nil
         imageView.layer.borderWidth = 0
-    }
-    
-    // функция сброса данных квиза
-    func resetQuiz() {
-        presenter.resetQuestionIndex()
-        correctAnswers = 0
-        resetBorders()
     }
 
     // метод отображения вопроса
@@ -129,65 +109,22 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         
         if isCorrect {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
-            correctAnswers += 1
         } else {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
-            self.presenter.correctAnswers = self.correctAnswers
             self.presenter.questionFactory = self.questionFactory
             self.presenter.alertPresenter = self.alertPresenter
             self.showLoadingIndicator()
-            self.showNextQuestionOrResults()
+            self.presenter.showNextQuestionOrResults()
         }
     }
     
     // метод отображения алерта
     func presentAlert(alert: UIAlertController) {
         self.present(alert, animated: true, completion: nil)
-    }
-    
-    // функция отображения результатов квиза либо следующего вопроса
-    private func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            
-            // формирование и сохранение данных для результата
-            let currentGameResult = GameResult(correct: correctAnswers, total: presenter.questionsAmount, date: Date().dateTimeString)
-            
-            self.statisticsService?.store(correct: currentGameResult.correct, total: currentGameResult.total)
-        
-            let result = String(currentGameResult.correct) + "/" + String(currentGameResult.total)
-            
-            let totalGamesCount = String((self.statisticsService?.gamesCount ?? 0))
-
-            let record = "\(self.statisticsService?.bestGame.correct ?? currentGameResult.correct)/\(self.statisticsService?.bestGame.total ?? currentGameResult.total) (\(self.statisticsService?.bestGame.date ?? "date not found"))"
-            
-            var currentAccuracy: String = "146" // просто не придумал, что возвращать в случае ошибки
-            if let accuracy = self.statisticsService?.totalAccuracy {
-                currentAccuracy = String(format: "%.2f", accuracy) + " %"
-            }
-
-            let quizResult = AlertModel(
-                title: "Раунд окончен",
-                message: "Ваш результат: \(result),\nКоличество сыгранных квизов: \(totalGamesCount)\nРекорд: \(record)\nСредняя точность: \(currentAccuracy)",
-                buttonText: "Сыграть еще раз") { [weak self] in
-                    guard let self = self else { return }
-                    
-                    self.resetQuiz()
-                    self.questionFactory?.requestNextQuestion()
-                }
-                
-            // Выводим алерт
-            self.alertPresenter?.show(quiz: quizResult)
-            
-        } else {
-            resetBorders()
-            presenter.switchToNextQuestion()
-
-            questionFactory?.requestNextQuestion()
-        }
     }
     
     private func showNetworkError(message: String) {
@@ -199,7 +136,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             buttonText: "Попробовать еще раз") { [weak self] in
                 guard let self = self else { return }
                 
-                self.resetQuiz()
+                self.presenter.resetQuiz()
                 self.questionFactory?.requestNextQuestion()
             }
         

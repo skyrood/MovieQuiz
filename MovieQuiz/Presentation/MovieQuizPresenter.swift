@@ -28,6 +28,12 @@ final class MovieQuizPresenter {
     func resetQuestionIndex() {
         currentQuestionIndex = 0
     }
+    
+    func resetQuiz() {
+        currentQuestionIndex = 0
+        correctAnswers = 0
+        viewController?.resetBorders()
+    }
         
     func switchToNextQuestion() {
         currentQuestionIndex += 1
@@ -52,12 +58,15 @@ final class MovieQuizPresenter {
         didAnswer(true)
     }
     
-    private func didAnswer(_ answer: Bool) {
+    func didAnswer(_ answer: Bool) {
         viewController?.changeButtonsEnabledState(to: false)
         guard let currentQuestion = currentQuestion else { return }
         
         let givenAnswer = answer
         let result = (givenAnswer == currentQuestion.correctAnswer)
+        if result {
+            correctAnswers += 1
+        }
         viewController?.showAnswerResult(isCorrect: result)
     }
     
@@ -101,7 +110,7 @@ final class MovieQuizPresenter {
                 buttonText: "Сыграть еще раз") { [weak self] in
                     guard let self = self else { return }
                     
-                    self.viewController?.resetQuiz()
+                    self.resetQuiz()
                     self.questionFactory?.requestNextQuestion()
                 }
                 
