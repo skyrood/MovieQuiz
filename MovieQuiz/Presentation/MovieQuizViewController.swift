@@ -6,12 +6,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         return .lightContent
     }
     
-    // инициализация номера вопроса и количества правильных ответов
-    private var currentQuestionIndex: Int = 0
+    // инициализация количества правильных ответов
     private var correctAnswers: Int = 0
     
+    // инициализация презентера
+    private let presenter = MovieQuizPresenter()
+    
     // инициализация количества вопросов для раунда, переменных фабрики вопросов, текущего вопроса, алерт презентера
-    private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
@@ -68,7 +69,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         guard let question = question else { return }
         
         currentQuestion = question
-        let viewModel = convert(model: question)
+        let viewModel = presenter.convert(model: question)
         
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
@@ -99,14 +100,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     }
     
     // функция преобразования данных вопросов в вопрос
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        return QuizStepViewModel(
-            image: model.image,
-            question: model.text,
-            questionNumber: currentQuestionIndex,
-            questionsAmount: questionsAmount
-        )
-    }
+//    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+//        return QuizStepViewModel(
+//            image: model.image,
+//            question: model.text,
+//            questionNumber: currentQuestionIndex,
+//            questionsAmount: questionsAmount
+//        )
+//    }
     
     // функция сброса рамки картинки
     private func resetBorders() {
@@ -116,7 +117,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // функция сброса данных квиза
     func resetQuiz() {
-        currentQuestionIndex = 0
+        presenter.resetQuestionIndex()
         correctAnswers = 0
         resetBorders()
     }
@@ -155,10 +156,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // функция отображения результатов квиза либо следующего вопроса
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionsAmount - 1 {
+        if presenter.isLastQuestion() {
             
             // формирование и сохранение данных для результата
-            let currentGameResult = GameResult(correct: correctAnswers, total: questionsAmount, date: Date().dateTimeString)
+            let currentGameResult = GameResult(correct: correctAnswers, total: presenter.questionsAmount, date: Date().dateTimeString)
             
             self.statisticsService?.store(correct: currentGameResult.correct, total: currentGameResult.total)
         
@@ -188,7 +189,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             
         } else {
             resetBorders()
-            currentQuestionIndex += 1
+            presenter.switchToNextQuestion()
 
             questionFactory?.requestNextQuestion()
         }
