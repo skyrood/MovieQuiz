@@ -1,18 +1,13 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
+final class MovieQuizViewController: UIViewController {
+    
     // меняем цвет текста в статус баре, т.к. фон приложения темный
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
     
     private var presenter: MovieQuizPresenter!
-    
-    // инициализация сервиса статистики
-    var statisticsService: StatisticsServiceProtocol?
-    
-    // инициализация алерт презентера
-    private var alertPresenter: AlertPresenterProtocol?
     
     // инициализация аутлетов элементов интерфейса
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
@@ -38,14 +33,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         
         // инициализация презентера
         presenter = MovieQuizPresenter(viewController: self)
-        
-        // создаем экземпляр сервиса статистики
-        statisticsService = StatisticsService()
-        
-        // создаем объект алерт презентера
-        alertPresenter = AlertPresenter()
-        alertPresenter?.setDelegate(self)
-        
+
         // загружаем данные при запуске приложения
         activityIndicator.hidesWhenStopped = true
         showLoadingIndicator()
@@ -75,7 +63,7 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
     
     // метод подсвечивания рамки изображения в зависимости от правильности ответа
     // и перехода к следующему вопросу/показу результатов
-    func showAnswerResult(isCorrect: Bool) {
+    func highlightImageBorder(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         
@@ -84,36 +72,6 @@ final class MovieQuizViewController: UIViewController, AlertPresenterDelegate {
         } else {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            guard let self = self else { return }
-//            self.presenter.questionFactory = self.questionFactory
-            self.presenter.alertPresenter = self.alertPresenter
-            self.showLoadingIndicator()
-            self.presenter.showNextQuestionOrResults()
-        }
-    }
-    
-    // метод отображения алерта
-    func presentAlert(alert: UIAlertController) {
-        self.present(alert, animated: true, completion: nil)
-    }
-    
-    func showNetworkError(message: String) {
-        hideLoadingIndicator()
-        
-        let errorInfo = AlertModel(
-            title: "Ошибка",
-            message: message,
-            buttonText: "Попробовать еще раз") { [weak self] in
-                guard let self = self else { return }
-                
-                self.presenter.resetQuiz()
-//                self.questionFactory?.requestNextQuestion()
-            }
-        
-        // Создаем и выводим алерт
-        self.alertPresenter?.show(quiz: errorInfo)
     }
     
     func changeButtonsEnabledState(to status: Bool) {

@@ -8,9 +8,10 @@
 import UIKit
 
 class AlertPresenter: AlertPresenterProtocol {
+    
     weak var delegate: AlertPresenterDelegate?
     
-    func setDelegate(_ delegate: AlertPresenterDelegate) {
+    init(delegate: AlertPresenterDelegate? = nil) {
         self.delegate = delegate
     }
 
