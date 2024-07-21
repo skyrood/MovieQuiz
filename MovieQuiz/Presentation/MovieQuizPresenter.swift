@@ -9,11 +9,11 @@ import UIKit
 
 final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate {
     private var questionFactory: QuestionFactoryProtocol?
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     private let statisticsService: StatisticsServiceProtocol!
     private var alertPresenter: AlertPresenterProtocol?
     
-    init(viewController: MovieQuizViewController) {
+    init(viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         statisticsService = StatisticsService()
@@ -55,7 +55,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
         currentQuestionIndex += 1
     }
     
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+    func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
             image: model.image,
             question: model.text,
@@ -97,7 +97,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
         }
     }
     
-    private func proceedToNextQuestionOrResults() {
+    private func proceedToNextQuestionOrPresentResults() {
         
         if self.isLastQuestion() {
             let currentGameResult = GameResult(correct: correctAnswers, total: self.questionsAmount, date: Date().dateTimeString)
@@ -124,7 +124,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
                     self.questionFactory?.requestNextQuestion()
                 }
                 
-            self.alertPresenter?.show(quiz: quizResult)
+            self.alertPresenter?.createAlert(with: quizResult)
             
         } else {
             viewController?.resetBorders()
@@ -141,7 +141,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
     }
     
     func didFailToLoadData(with error: Error) {
-        self.showNetworkError(message: error.localizedDescription)
+        self.presentNetworkErrorAlert(message: error.localizedDescription)
     }
     
     private func proceedWithAnswer(isCorrect: Bool) {
@@ -150,16 +150,15 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
             self.viewController?.showLoadingIndicator()
-            self.proceedToNextQuestionOrResults()
+            self.proceedToNextQuestionOrPresentResults()
         }
     }
     
     func presentAlert(alert: UIAlertController) {
-        self.viewController?.present(alert, animated: true, completion: nil)
+        self.viewController?.showAlert(alert: alert)
     }
     
-    
-    private func showNetworkError(message: String) {
+    private func presentNetworkErrorAlert(message: String) {
         self.viewController?.hideLoadingIndicator()
         
         let errorInfo = AlertModel(
@@ -171,6 +170,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
                 self.loadDataForQuiz()
             }
         
-        self.alertPresenter?.show(quiz: errorInfo)
+        self.alertPresenter?.createAlert(with: errorInfo)
     }
 }

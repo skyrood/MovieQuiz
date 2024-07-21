@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     
     // меняем цвет текста в статус баре, т.к. фон приложения темный
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -61,6 +61,11 @@ final class MovieQuizViewController: UIViewController {
         questionLabel.text = step.question
     }
     
+    // метод отображение алерта
+    func showAlert(alert: UIAlertController) {
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     // метод подсвечивания рамки изображения в зависимости от правильности ответа
     // и перехода к следующему вопросу/показу результатов
     func highlightImageBorder(isCorrect: Bool) {
@@ -74,6 +79,7 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
+    // метод блока/анблока кнопок
     func changeButtonsEnabledState(to status: Bool) {
         noButton.isEnabled = status
         yesButton.isEnabled = status
