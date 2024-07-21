@@ -62,9 +62,22 @@ final class QuestionFactory: QuestionFactoryProtocol {
             
             let rating = Float(movie.rating) ?? 0
             
-            let text = "Рейтинг этого фильма больше чем 7?"
-            let correctAnswer = rating > 7
+            var text: String = ""
+            var correctAnswer: Bool = false
             
+            // генератор случайных вариантов вопроса
+            let lowerRating = Int(floor(rating))
+            let upperRating = Int(ceil(rating))
+            
+            if lowerRating != upperRating {
+                let questionRating = Bool.random() ? lowerRating : upperRating
+                Bool.random() ? (text = "Рейтинг этого фильма больше чем \(questionRating)?", correctAnswer = rating > Float(questionRating)) : (text = "Рейтинг этого фильма меньше чем \(questionRating)?", correctAnswer = rating < Float(questionRating))
+            } else {
+                let questionRating = rating - 1
+                Bool.random() ? (text = "Рейтинг этого фильма меньше чем \(questionRating)?", correctAnswer = false) : (text = "Рейтинг этого фильма больше чем \(questionRating)?", correctAnswer = true)
+            }
+            // конец генератора
+
             let question = QuizQuestion(image: imageData, text: text, correctAnswer: correctAnswer)
             
             self.questionIndices.removeAll { $0 == index }
@@ -74,63 +87,5 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 self.delegate?.didReceiveNextQuestion(question: question)
             }
         }
-        
-        
-// generating questions from mock data
-        
-// мок дата для квиза
-//    private var quizQuestions: [QuizQuestion] = [
-//        QuizQuestion(
-//            image: "The Godfather",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: true),
-//        QuizQuestion(
-//            image: "The Dark Knight",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: true),
-//        QuizQuestion(
-//            image: "Kill Bill",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: true),
-//        QuizQuestion(
-//            image: "The Avengers",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: true),
-//        QuizQuestion(
-//            image: "Deadpool",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: true),
-//        QuizQuestion(
-//            image: "The Green Knight",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: true),
-//        QuizQuestion(
-//            image: "Old",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: false),
-//        QuizQuestion(
-//            image: "The Ice Age Adventures of Buck Wild",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: false),
-//        QuizQuestion(
-//            image: "Tesla",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: false),
-//        QuizQuestion(
-//            image: "Vivarium",
-//            text: "Рейтинг этого фильма больше чем 6?",
-//            correctAnswer: false)
-//    ]
-
-//        guard let index = questionIndices.randomElement() else {
-//            delegate?.didReceiveNextQuestion(question: nil)
-//            return
-//        }
-//        
-//        questionIndices.removeAll { $0 == index }
-//        
-//        let question = quizQuestions[safe: index]
-//        
-//        delegate?.didReceiveNextQuestion(question: question)
     }
 }
