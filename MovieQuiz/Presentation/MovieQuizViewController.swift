@@ -28,6 +28,10 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
         yesButton.titleLabel?.font = UIFont(name: "YSDIsplay-Medium", size: 20)
         noButton.titleLabel?.font = UIFont(name: "YSDIsplay-Medium", size: 20)
         
+        questionTitleLabel.text = String(Localization.localizedString(forKey: "question", comment: "no comment"))
+        yesButton.setTitle(String(Localization.localizedString(forKey: "yesButtonText", comment: "no comment")), for: .normal)
+        noButton.setTitle(String(Localization.localizedString(forKey: "noButtonText", comment: "no comment")), for: .normal)
+        
         // задаем закругление границ картинки
         imageView.layer.cornerRadius = 20
         

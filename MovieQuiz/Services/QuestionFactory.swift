@@ -69,12 +69,15 @@ final class QuestionFactory: QuestionFactoryProtocol {
             let lowerRating = Int(floor(rating))
             let upperRating = Int(ceil(rating))
             
+            let questionGreaterThan = Localization.localizedString(forKey: "questionGreaterThan")
+            let questionLessThan = Localization.localizedString(forKey: "questionLessThan")
+            
             if lowerRating != upperRating {
                 let questionRating = Bool.random() ? lowerRating : upperRating
-                Bool.random() ? (text = "Рейтинг этого фильма больше чем \(questionRating)?", correctAnswer = rating > Float(questionRating)) : (text = "Рейтинг этого фильма меньше чем \(questionRating)?", correctAnswer = rating < Float(questionRating))
+                Bool.random() ? (text = String(format: questionGreaterThan, questionRating), correctAnswer = rating > Float(questionRating)) : (text = String(format: questionLessThan, questionRating), correctAnswer = rating < Float(questionRating))
             } else {
                 let questionRating = rating - 1
-                Bool.random() ? (text = "Рейтинг этого фильма меньше чем \(questionRating)?", correctAnswer = false) : (text = "Рейтинг этого фильма больше чем \(questionRating)?", correctAnswer = true)
+                Bool.random() ? (text = String(format: questionLessThan, Int(questionRating)), correctAnswer = false) : (text = String(format: questionGreaterThan, Int(questionRating)), correctAnswer = true)
             }
             // конец генератора
 

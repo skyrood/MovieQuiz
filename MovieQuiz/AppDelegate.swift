@@ -6,6 +6,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        //устанавливаем язык приложения
+        UserDefaults.standard.set([Constants.appLanguage], forKey: "AppleLanguages")
+        UserDefaults.standard.synchronize()
+
         return true
     }
 

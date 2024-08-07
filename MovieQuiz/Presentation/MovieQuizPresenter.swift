@@ -29,7 +29,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
     private let questionsAmount: Int = 10
     private var currentQuestionIndex: Int = 0
     
-    private var correctAnswers: Int = 0 //new
+    private var correctAnswers: Int = 0
     
     private var currentQuestion: QuizQuestion?
 
@@ -110,14 +110,18 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
 
             let record = "\(self.statisticsService.bestGame.correct)/\(self.statisticsService.bestGame.total) (\(self.statisticsService.bestGame.date))"
             
-            var currentAccuracy: String = "146" // просто не придумал, что возвращать в случае ошибки
+//            var currentAccuracy: String = "146" // просто не придумал, что возвращать в случае ошибки
             
-            currentAccuracy = String(format: "%.2f", self.statisticsService.totalAccuracy) + " %"
+            var currentAccuracy = String(format: "%.2f", self.statisticsService.totalAccuracy) + " %"
+            
+            let title = String(Localization.localizedString(forKey: "quizResultTitle", comment: ""))
+            let message = String(format: Localization.localizedString(forKey: "quizResultMessage", comment: ""), result, totalGamesCount, record, currentAccuracy)
+            let buttonText = String(Localization.localizedString(forKey: "quizResultButtonText", comment: ""))
             
             let quizResult = AlertModel(
-                title: "Раунд окончен",
-                message: "Ваш результат: \(result),\nКоличество сыгранных квизов: \(totalGamesCount)\nРекорд: \(record)\nСредняя точность: \(currentAccuracy)",
-                buttonText: "Сыграть еще раз") { [weak self] in
+                title: title,
+                message: message,
+                buttonText: buttonText) { [weak self] in
                     guard let self = self else { return }
                     
                     self.resetQuiz()
@@ -162,9 +166,9 @@ final class MovieQuizPresenter: QuestionFactoryDelegate, AlertPresenterDelegate 
         self.viewController?.hideLoadingIndicator()
         
         let errorInfo = AlertModel(
-            title: "Ошибка",
+            title: String(Localization.localizedString(forKey: "errorAlertTitle", comment: "")),
             message: message,
-            buttonText: "Попробовать еще раз") { [weak self] in
+            buttonText: String(Localization.localizedString(forKey: "errorAlertButtonText", comment: ""))) { [weak self] in
                 guard let self = self else { return }
                 
                 self.loadDataForQuiz()

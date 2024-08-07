@@ -11,11 +11,6 @@ protocol MoviesLoading {
     func loadMovies(handler: @escaping (Result<MostPopularMovies, Error>) -> Void)
 }
 
-private enum ApiUrlConstants {
-    static let baseUrl = "https://tv-api.com/en/API/Top250Movies/"
-    static let privateKey = "k_zcuw1ytf"
-}
-
 struct MoviesLoader: MoviesLoading {
     private let networkClient: NetworkRouting
     
@@ -24,7 +19,7 @@ struct MoviesLoader: MoviesLoading {
     }
     
     private var mostPopularMoviesUrl: URL {
-        guard let url = URL(string: (ApiUrlConstants.baseUrl + ApiUrlConstants.privateKey)) else {
+        guard let url = URL(string: (Constants.apiBaseUrl + Constants.apiPrivateKey)) else {
             preconditionFailure("Unable to construct mostPopularMoviesUrl")
         }
         
