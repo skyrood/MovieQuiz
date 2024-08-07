@@ -8,22 +8,23 @@
 import UIKit
 
 class AlertPresenter: AlertPresenterProtocol {
+    
     weak var delegate: AlertPresenterDelegate?
     
-    func setDelegate(_ delegate: AlertPresenterDelegate) {
+    init(delegate: AlertPresenterDelegate? = nil) {
         self.delegate = delegate
     }
 
-    func show(quiz result: AlertModel) {
+    func createAlert(with model: AlertModel) {
         let alert = UIAlertController(
-            title: result.title,
-            message: result.message,
+            title: model.title,
+            message: model.message,
             preferredStyle: .alert)
         
         alert.view.accessibilityIdentifier = "completionAlert"
         
-        let action = UIAlertAction(title: result.buttonText, style: .default) { _ in
-            result.completion()
+        let action = UIAlertAction(title: model.buttonText, style: .default) { _ in
+            model.completion()
         }
         
         alert.addAction(action)
